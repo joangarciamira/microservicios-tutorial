@@ -8,5 +8,7 @@ spring:
           default-label: eureka
           uri: https://github.com/joangarciamira/microservicios-tutorial
           search-paths: config-data
+      discovery:
+        enabled: true
   application:
     name: config-service
