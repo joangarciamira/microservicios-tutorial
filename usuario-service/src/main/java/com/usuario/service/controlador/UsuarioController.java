@@ -19,6 +19,8 @@ import com.usuario.service.modelos.Coche;
 import com.usuario.service.modelos.Moto;
 import com.usuario.service.servicio.UsuarioService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
 @RestController
 @RequestMapping("/usuario")
 public class UsuarioController {
@@ -58,6 +60,7 @@ public class UsuarioController {
 		
 	}
 	
+	@CircuitBreaker(name = "cocheCB", fallbackMethod = "fallbackListarCoches")
 	@GetMapping("/coche/{usuarioId}")
 	public ResponseEntity<List<Coche>> listarCoches(@PathVariable("usuarioId") int usuarioId){
 		
@@ -73,6 +76,7 @@ public class UsuarioController {
 		return ResponseEntity.ok(coches);
 	}
 	
+	@CircuitBreaker(name = "cocheCB", fallbackMethod = "fallbackListarMotos")
 	@GetMapping("/moto/{usuarioId}")
 	public ResponseEntity<List<Moto>> listarMotos(@PathVariable("usuarioId") int usuarioId){
 		
@@ -88,6 +92,7 @@ public class UsuarioController {
 		return ResponseEntity.ok(motos);
 	}
 	
+	@CircuitBreaker(name = "cocheCB", fallbackMethod = "fallbackGuardarCoche")
  	@PostMapping("/coche/{usuarioId}")
  	public ResponseEntity<Coche> guardarCoche(@PathVariable int usuarioId,
  												@RequestBody Coche coche){
@@ -95,6 +100,7 @@ public class UsuarioController {
  		return ResponseEntity.ok(cocheNuevo);
  	}
  	
+	@CircuitBreaker(name = "cocheCB", fallbackMethod = "fallbackGuardarMoto")
  	@PostMapping("/moto/{usuarioId}")
  	public ResponseEntity<Moto> guardarMoto(@PathVariable int usuarioId,
  			@RequestBody Moto moto){
@@ -102,9 +108,14 @@ public class UsuarioController {
  		return ResponseEntity.ok(motoNueva);
  	}
 	
+	@CircuitBreaker(name = "allCB", fallbackMethod = "fallbackGetAll")
 	@GetMapping("/todos/{usuarioId}")
 	public ResponseEntity<Map<String, Object>> listarVehiculos(@PathVariable int usuarioId){
 		Map<String, Object> mapa = usuarioService.getUsuarioAndVehiculos(usuarioId);
 		return ResponseEntity.ok(mapa);
+	}
+	
+	private ResponseEntity<List<Coche>> fallbackGetCoches(@PathVariable("usuarioId") int usuarioId) {
+		return new ResponseEntity("El usuario " +usuarioId+ " tiene los coches en el taller", HttpStatus.OK);
 	}
 }
